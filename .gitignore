@@ -127,3 +127,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# OS
+.DS_Store
+
+# Platform + IDE
+.DS_Store
+.vscode
+
+# Misc models
+app/nlp/misc/*.txt
+app/nlp/misc/*.bz2
+
+
