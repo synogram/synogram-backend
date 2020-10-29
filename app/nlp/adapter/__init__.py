@@ -1,0 +1,1 @@
+from . import Wiki2VecAdapter, BERT2VecAdapter

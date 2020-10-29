@@ -3,7 +3,7 @@ This file is the entry point of the flask server. It initialize all configuratio
 For development server will be run on main at here.
 """
 from flask import Flask, request
-import nlp.models as nlp
+import nlp
 import logging
 from config import config
 import exceptions
@@ -13,7 +13,9 @@ import exceptions
 logging.basicConfig(filename=config['Log'], format='%(asctime)s %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-nlp.init()
+# TODO: add adapters.
+nlp.Word2VecModelUser.load()
+nlp.SummaryModelUser.load()
 
 ########################################################################################################################################
 # Routing starts here.
@@ -27,21 +29,22 @@ def root():
     return app.send_static_file('index.html')
 
 
-@app.route('/api/web', methods=['GET'])
-def query_web():
-    """ Returns Web based on query
-        Args:
-            query: string of a word for the query.
-            dim: dimension of the coordinates to be returns. 
-        Returns:
-            return json(dictionary) of the web.
-    """
-    if request.method == 'GET':
-        query = request.args.get('query')
-        dim = int(request.args.get('dim'))
-        return nlp.wiki2vec.build_web(query, dim), 200
-    else:
-        return 'bad request', 400
+# @app.route('/api/web', methods=['GET'])
+# def query_web():
+#     """ Returns Web based on query
+#         Args:
+#             query: string of a word for the query.
+#             dim: dimension of the coordinates to be returns. 
+#         Returns:
+#             return json(dictionary) of the web.
+#     """
+#     if request.method == 'GET':
+#         query = request.args.get('query')
+#         dim = int(request.args.get('dim'))
+#         # return nlp.wiki2vec.build_web(query, dim), 200
+#         return {}, 200
+#     else:
+#         return 'bad request', 400
 
 
 @app.errorhandler(exceptions.BadArgumentRequest)

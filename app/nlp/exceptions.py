@@ -1,0 +1,1 @@
+class ModelReloadException(Exception): pass
