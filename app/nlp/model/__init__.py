@@ -1,1 +1,1 @@
-from . import pretrained
+from . import BERTExtractiveModel, Wiki2VecModel
