@@ -14,6 +14,6 @@ def summarize(article):
         Extractive Summary (Pull most important sentences from given article).
         :param article: string of text to be summarized.
     """
-    BERTExtractiveModel.summarize(article)
+    return BERTExtractiveModel.summarize_article(article)
         
 
