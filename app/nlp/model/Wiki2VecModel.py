@@ -95,8 +95,8 @@ def most_similar(*words, topn=5) -> list:
     query_words = as_output_words(*words)
     for q in query_words:
         if q not in unique_o_words:
-            unique_o_words.append(q)
-            uw_dists.append(max_score)
+            unique_o_words.insert(0, q)
+            uw_dists.insert(0, max_score)
 
     return unique_o_words[:topn], uw_dists[:topn]
 
