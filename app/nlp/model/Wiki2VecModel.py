@@ -9,8 +9,12 @@ import numpy as np
 import logging
 
 
-###################################################################### Model & Config ######################################################################
+########################################################################################################################################
+# Config & Load
+########################################################################################################################################
 path = config['model']['embedding']['wiki2vec']['path']
+edge_n = config['model']['embedding']['wiki2vec']['edge_n']
+max_score = config['model']['embedding']['wiki2vec']['max_score']
 _wiki2vec = None
 n_vocab = None
 n_embed = None
@@ -30,7 +34,10 @@ def load():
     n_vocab = len(_wiki2vec.wv.vocab)
     n_embed = _wiki2vec.vector_size
 
-######################################################################### Helper ##########################################################################
+
+########################################################################################################################################
+# Helper
+########################################################################################################################################
 lower = lambda words: [w.lower() for w in words]
 
 def as_input_words(*words):
@@ -38,10 +45,18 @@ def as_input_words(*words):
     return lower(words)
 
 def as_output_words(*words):
-    # TODO: Output words. 
-    return words
+    o_words = []
+    for w in words:
+        o_w = w.replace('ENTITY/', '')
+        o_w = o_w.replace('_', ' ')
+        o_w = o_w.title()
+        o_words.append(o_w)
 
-###################################################################### Functionality #######################################################################
+    return o_words
+
+########################################################################################################################################
+# Functionality
+########################################################################################################################################
 def word2vec(*words) -> list:
     """
         Convert words to vectors.
@@ -55,13 +70,35 @@ def most_similar(*words, topn=5) -> list:
     """
         Find most similar words.
         :param *words: words to query.
-        :param topn: number of return words.
-        :return: list of tuple (word, -log of cosine similiarity)
+        :param topn: number of expected return words.
+        :param edge_n: the method will look for topn+edge_n similar word in case some words are duplicated.
+        :return: list of tuple (word, -log of cosine similiarity). This function does not guarantee to return topn words. 
     """
-    zipped = _wiki2vec.most_similar(positive=words, topn=topn)
-    words, dists = list(zip(*zipped))
-    dists = -np.log(dists)
-    return list(zip(words, dists.tolist()))
+    # Get most similar topn + edge_n words.
+    zipped = _wiki2vec.most_similar(positive=words, topn=topn+edge_n)
+    zipped = np.array(zipped)
+
+    # Process the outputs words.
+    o_words = np.array(as_output_words(*zipped[:, 0]))
+    unique_o_words = np.unique(o_words)
+    dists =  zipped[:, 1].astype(float)
+    uw_dists = []   
+
+    # If there are duplicated words i.e. ENTITY/Obama & obama, get maximum score.
+    for uw in unique_o_words:
+        mask = o_words == uw
+        uw_dists.append(-np.log(dists[mask].max()))
+    
+    unique_o_words = unique_o_words.tolist()
+
+    # Append the query words with max score.
+    query_words = as_output_words(*words)
+    for q in query_words:
+        if q not in unique_o_words:
+            unique_o_words.append(q)
+            uw_dists.append(max_score)
+
+    return unique_o_words[:topn], uw_dists[:topn]
 
 def reduce_dim(*embeddings, dim=2):
     """

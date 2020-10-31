@@ -2,6 +2,7 @@
     Word2VecModelUser is entry point for user to interact with NLP package regarding word embedding tasks.
 """
 from ..model import Wiki2VecModel
+from itertools import cycle, islice
 
 def load():
     """
@@ -28,7 +29,7 @@ def most_similar(*words, topn=5):
     """
     return Wiki2VecModel.most_similar(*words, topn=topn)
 
-def sematic_field(word, topn=5, dim=2):
+def sematic_field(*words, topn=5, edge_n=10, dim=2):
     """
         Find most closely related words and also provide vector representation of the words.
         :param word: query word. 
@@ -38,17 +39,18 @@ def sematic_field(word, topn=5, dim=2):
     """
     if topn <= dim:
         raise ValueError(f'topn: {topn} value must be greater than dim: {dim}')
-    
+
     # Find most similar words & distance from the query word. 
-    neighbour = most_similar(word, topn=topn)
+    sim_words, dists = most_similar(*words, topn=topn)
 
-    # Unzip the neighbour to list of words and distances. 
-    neighbour = list(zip(*neighbour))
-    words, dists = neighbour[0], neighbour[1]
+    # If by very low probability, most_similar return numbers of words less than topn, cycle.
+    if len(sim_words) <= dim:
+        idx = list(range(len(sim_words)))
+        rp_idx = list(islice(cycle(idx), topn))
+        words = [sim_words[ri] for ri in rp_idx]
+        dists = [dists[ri] for ri in rp_idx]
 
-    # Provide reduced representation of vector
-    embs = word2vec(*words, dim=dim)
+    # Provide reduced representation of vector    
+    embs = word2vec(*sim_words, dim=dim)
 
-    # TODO: Clean words
-
-    return list(zip(words, dists, embs))
+    return list(zip(sim_words, dists, embs))
