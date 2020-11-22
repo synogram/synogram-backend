@@ -1,1 +1,1 @@
-from . import SummaryModelUser, WordEmbedModel
+from . import SummaryModelUser, WordEmbedModelUser

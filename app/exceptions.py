@@ -14,3 +14,6 @@ class UnknownAPIRequest(BadRequest):
     def __init__(self, msg=''):
         self.msg = msg
         self.code = 400
+    
+class WikiPageNotFound(Exception):
+    pass
