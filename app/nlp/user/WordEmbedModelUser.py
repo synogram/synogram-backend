@@ -31,7 +31,7 @@ def w2v(*word):
 
 def most_similar(*word, topn=10):
     try:
-        return _model.most_similar(*word, topn=10)
+        return _model.most_similar(*word, topn=topn)
     except Exception as e:
         # TODO:
         raise e
