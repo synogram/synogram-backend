@@ -7,17 +7,22 @@ import nlp
 import logging
 from config import config
 import exceptions
-import wikipedia
+import wikipediaapi
 import json
 import re
-
+import random
+import requests
 
 # Configuration
 logging.basicConfig(filename=config['Log'], format='%(asctime)s %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+wiki = wikipediaapi.Wikipedia(
+        language='en',
+        extract_format=wikipediaapi.ExtractFormat.WIKI
+)
 
 # Load NLP modules.
-nlp.Word2VecModelUser.load()
+nlp.WordEmbedModelUser.load()
 nlp.SummaryModelUser.load()
 
 ########################################################################################################################################
@@ -25,13 +30,20 @@ nlp.SummaryModelUser.load()
 ########################################################################################################################################
 app = Flask(__name__, static_folder=config['Build'], static_url_path='/')
 
-def wordCheck(word):
+def word_check(word):
     exp = re.compile('^[a-zA-Z0-9,.!?\s]+$')
     result = exp.match(word)
     if result:
         return True
     else:
         raise ValueError
+
+def pull_wiki_page(query):
+    page = wiki.page(query)
+    if page.exists():
+        return page.summary
+    else:
+        raise exceptions.WikiPageNotFound()
 
 
 @app.route('/', methods=['GET'])
@@ -44,36 +56,36 @@ def root():
 ########################################################################################################################################
 # API Handler
 ########################################################################################################################################
-@app.route('/api/query/<string:query>/<int:dim>', methods=['GET'])
-def query_nearby_words(query, dim):
+# TODO: Handle help.
+
+@app.route('/api/query/<string:query>/<int:topn>', methods=['GET'])
+def query_nearby_words(query, topn):
     try:
-        wordCheck(query)
-        returnValue = nlp.Word2VecModelUser.sematic_field(query, dim=dim, topn=10)
-        returnDict = {word: {'score': score, 'vector': vector} for word, score, vector in returnValue}
-        return json.dumps(returnDict)   
+        word_check(query)
+        words, scores = nlp.WordEmbedModelUser.most_similar(query, topn=topn)
+        return_dict = { 'words': words, 'scores': scores }
+        return json.dumps(return_dict)   
     except KeyError:
         return 'Query not found'
     except ValueError:
         return 'Query not accepted'
     except:
         return 'Other problem'
-    # TODO: use nlp.Word2VecModelUser.sematic_field function. 
-    # TODO: make sure to handle case when the word is not in vocab. try catch.
 
 @app.route('/api/summary/<string:query>', methods=['GET'])
 def summarize_article(query):
     try:
-        wordCheck(query)
-        page = wikipedia.page(query)
-        content = nlp.SummaryModelUser.summarize(page.content)
-        return page.content
+        word_check(query)
+        txt = pull_wiki_page(query)
+        txt = re.sub('^[a-zA-Z0-9,.!?\s]+$', ' ', txt)
+        content = nlp.SummaryModelUser.summarize(txt)        
+        return content
     except ValueError:
-        return 'Query not accepted'
-    except:
-        return "Could not find page"
-    # TODO: use wikipedia library for pulling page, and use nlp.SummaryModeluser.summarize function. 
-    # TODO: make sure that the str passed into summarize function is  '/^[a-zA-Z0-9,.!? ]*$/'
-
+        return 'Query not accepted', 400
+    except exceptions.WikiPageNotFound:
+        return 'Page not found', 400
+    except Exception as e:
+        return 'Unknown Error' + str(e), 500 
 
 ########################################################################################################################################
 # Error Handler & Error Page.
