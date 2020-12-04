@@ -8,6 +8,7 @@ cymem==2.0.3
 dataclasses==0.6
 filelock==3.0.12
 Flask==1.1.2
+Flask-Cors==3.0.9
 future==0.18.2
 gensim==3.8.3
 idna==2.10

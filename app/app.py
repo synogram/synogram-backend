@@ -3,6 +3,7 @@ This file is the entry point of the flask server. It initialize all configuratio
 For development server will be run on main at here.
 """
 from flask import Flask, request
+from flask_cors import CORS, cross_origin
 import nlp
 import logging
 from config import config
@@ -29,6 +30,7 @@ nlp.SummaryModelUser.load()
 # Routing starts here.
 ########################################################################################################################################
 app = Flask(__name__, static_folder=config['Build'], static_url_path='/')
+cors = CORS(app)
 
 def word_check(word):
     exp = re.compile('^[a-zA-Z0-9,.!?\s]+$')
