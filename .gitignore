@@ -136,8 +136,8 @@ dmypy.json
 .vscode
 
 # Misc models
-app/nlp/misc/*.txt
-app/nlp/misc/*.bz2
-app/nlp/misc/*.zip
+nlp/misc/*.txt
+nlp/misc/*.bz2
+nlp/misc/*.zip
 
 *ngrok

@@ -6,8 +6,8 @@ from flask import Flask, request
 from flask_cors import CORS, cross_origin
 import nlp
 import logging
-from config import config
-import exceptions
+from .config import config
+from . import exceptions
 import wikipediaapi
 import json
 import re
