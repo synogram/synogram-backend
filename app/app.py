@@ -68,11 +68,11 @@ def query_nearby_words(query, topn):
         return_dict = { 'words': words, 'scores': scores }
         return json.dumps(return_dict)   
     except KeyError:
-        return 'Query not found'
+        return 'Query not found', 400
     except ValueError:
-        return 'Query not accepted'
+        return 'Query not accepted', 400
     except:
-        return 'Other problem'
+        return 'Unknown problem', 500
 
 @app.route('/api/summary/<string:query>', methods=['GET'])
 def summarize_article(query):
@@ -85,7 +85,7 @@ def summarize_article(query):
     except ValueError:
         return 'Query not accepted', 400
     except exceptions.WikiPageNotFound:
-        return 'Page not found', 400
+        return 'Wikipedia page not found', 400
     except Exception as e:
         return 'Unknown Error' + str(e), 500 
 
