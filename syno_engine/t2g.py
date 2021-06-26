@@ -68,6 +68,8 @@ def text2gaph(text):
 
     return rels 
 
+
+
 if __name__ == '__main__':
     text = """
     Barack Hussein Obama II (/bəˈrɑːk huːˈseɪn oʊˈbɑːmə/ (About this soundlisten) bə-RAHK hoo-SAYN oh-BAH-mə;[1] born August 4, 1961) is an American politician and attorney who served as the 44th president of the United States from 2009 to 2017. 
@@ -112,5 +114,8 @@ if __name__ == '__main__':
             if r['score'] > 0.5:
                 print('\t', r['head']['name'], '->', r['relation'], '->', r['tail']['name'], r['score'])
 
+    import json
 
+    with open('example.json', 'w') as f:
+        json.dump(relations, f)
 
