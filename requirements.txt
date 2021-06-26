@@ -51,3 +51,7 @@ Werkzeug==1.0.1
 wget==3.2
 Wikipedia-API==0.5.4
 zipp==3.4.0
+opennre @ git+git://github.com/jsong336/OpenNRE.git@master
+jaxlib==0.1.68
+allennlp==2.5.0
+allennlp-models==2.5.0
