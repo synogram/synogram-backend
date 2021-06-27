@@ -29,6 +29,7 @@ class BaseNER(BaseModel):
         pass
 
     def __call__(self, sent):
+        assert self.is_loaded, "Model is not loaded"
         return self._extract_entities(sent)
 
     
@@ -41,6 +42,7 @@ class BaseRE(BaseModel):
         pass
 
     def __call__(self, sent, ent_pair):
+        assert self.is_loaded, "Model is not loaded"
         return self._extract_relations(sent, ent_pair)
 
 
@@ -53,7 +55,17 @@ class BaseCOREF(BaseModel):
         pass
 
     def __call__(self, text):
+        assert self.is_loaded, "Model is not loaded"
         return self._resolve_coref(text)
 
+class BaseT2G(BaseModel):
+    def __init__(self) -> None:
+        super().__init__()
 
-    
+    @abstractmethod
+    def _text2graph(self, text):
+        pass
+
+    def __call__(self, text):
+        assert self.is_loaded, "Model is not loaded"
+        return self._text2graph(text)

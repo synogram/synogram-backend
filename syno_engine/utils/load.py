@@ -1,15 +1,9 @@
-from json import load
 from neo4j import GraphDatabase
 
-url = "bolt://192.168.99.100:7687/"
-
-def load_knowledge_graph(kgraph):
-    with GraphDatabase.driver(url, auth=("neo4j", "test1234")) as driver:
+def load_graph_neo4j(graph, url, auth):
+    with GraphDatabase.driver(url, auth=auth) as driver:
         sess = driver.session()
-
-        for relation in kgraph:
-            sess.run("CREATE (n:Sentence { sentence: $s })", s=relation['sentence'])
-
+        for relation in graph:
             for rel in relation['relations']:
                 sess.run("MERGE (n:Entity { name: $name, label: $label })", name=rel['head']['name'], label=rel['head']['label'])
                 sess.run("MERGE (n:Entity { name: $name, label: $label })", name=rel['tail']['name'], label=rel['tail']['label'])
@@ -18,19 +12,14 @@ def load_knowledge_graph(kgraph):
                         (h:Entity),
                         (t:Entity)
                     WHERE h.name=$h AND t.name=$t
-                    MERGE (h) - [r:Relation {relation:$rel, score:$score}] -> (t)
+                    MERGE (h) - [r:Relation {relation:$rel, score:$score, context: $ctx}] -> (t)
                 """, 
                 h=rel['head']['name'], 
                 t=rel['tail']['name'],
                 rel=rel['relation'],
-                score=rel['score'])
+                score=rel['score'],
+                ctx=relation['sentence'])
+            
 
-
-if __name__ == '__main__':
-    import json 
-
-    with open('example.json') as f:
-        kgraph = json.load(f)
-
-    load_knowledge_graph(kgraph)
+    
 

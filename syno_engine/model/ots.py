@@ -4,12 +4,14 @@ class SpacyNER(BaseNER):
     def __init__(self, model_name='en_core_web_sm'):
         super().__init__()
         self.model_name = model_name
+        self._model = None
 
     def load_model(self):
         import spacy
         self._model = spacy.load(self.model_name)
         return self
 
+    @property
     def model(self):
         return self._model
 
@@ -54,12 +56,14 @@ class OpenRE(BaseRE):
     def __init__(self, model_name='wiki80_cnn_softmax') -> None:
         super().__init__()
         self.model_name = model_name
+        self._model = None
 
     def load_model(self):
         import opennre
         self._model = opennre.get_model(self.model_name)
         return self
 
+    @property
     def model(self):
         return self._model
     
@@ -126,6 +130,11 @@ class AllenCOREF(BaseCOREF):
     def __init__(self, model_url="https://storage.googleapis.com/allennlp-public-models/coref-spanbert-large-2020.02.27.tar.gz") -> None:
         super().__init__()
         self.model_url = model_url
+        self._model = None
+
+    @property
+    def model(self):
+        return self._model
 
     def load_model(self):
         from allennlp.predictors.predictor import Predictor
@@ -135,6 +144,7 @@ class AllenCOREF(BaseCOREF):
     def _resolve_coref(self, text):
         return self._model.coref_resolved(text)
 
+    @property
     def model(self):
         return self._model
 
