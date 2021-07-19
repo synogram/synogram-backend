@@ -13,6 +13,7 @@ import json
 import re
 import random
 import requests
+import os
 
 # Configuration
 logging.basicConfig(filename=config['Log'], format='%(asctime)s %(message)s', level=logging.INFO)
@@ -107,4 +108,5 @@ if __name__ == '__main__':
     logger.info('Development Server Started')
     print("Running dev server on localhost:5000")
     app.debug = True
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
